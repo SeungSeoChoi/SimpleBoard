@@ -1,7 +1,7 @@
 package com.example.springbootexample.configuration;
 
-import javax.sql.DataSource;
-
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -11,13 +11,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import javax.sql.DataSource;
 
 
 @Configuration
 @PropertySource("classpath:/application.properties")
+@EnableTransactionManagement
 public class DBconfiguration {
     @Autowired
     //spring container의 일종이다. 빈의 생성, 사용, 관계, 생명 주기 등을 관리한다.
@@ -36,7 +39,7 @@ public class DBconfiguration {
     //매번 쿼리가 들어올때 마다 연결을 맺고 끊는 작업이 일어나면 매우 비효율적이기 때문에 커넥션 풀을 이용
     //커넥션 객체를 미리 생성해두고 요청이 들어오면 제공하고 반환하는 방법을 사용한다
     @Bean
-    public DataSource dataSource(){
+    public DataSource dataSource() {
         return new HikariDataSource(hikariConfig());
     }
 
@@ -59,7 +62,12 @@ public class DBconfiguration {
 
     @Bean
     @ConfigurationProperties(prefix = "mybatis.configuration")
-    public org.apache.ibatis.session.Configuration mybatisConfig(){
+    public org.apache.ibatis.session.Configuration mybatisConfig() {
         return new org.apache.ibatis.session.Configuration();
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        return new DataSourceTransactionManager(dataSource());
     }
 }
