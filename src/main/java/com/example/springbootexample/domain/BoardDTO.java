@@ -30,4 +30,12 @@ public class BoardDTO {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime deleteTime;
 
+    @Override
+    public String toString(){
+        String s = "title : " + title + "\n"
+                + "content : " + content + "\n"
+                + "writer : " + writer + "\n";
+        return s;
+    }
+
 }

@@ -17,9 +17,9 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public boolean registerBoard(BoardDTO params) {
-        int queryResult = 0;
+        int queryResult;
 
-        if(params.getIdx() == null)
+        if (params.getIdx() == null)
             queryResult = boardMapper.insertBoard(params);
         else
             queryResult = boardMapper.updateBoard(params);
@@ -33,16 +33,34 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public boolean deleteBoard(Long idx) {
+    public boolean updateBoard(BoardDTO params) {
+        int queryResult;
+
+        if (params.getIdx() == null) {
+            return false;
+        } else {
+            queryResult = boardMapper.updateBoard(params);
+        }
+
+        return (queryResult == 1);
+    }
+
+    @Override
+    public int deleteBoard(Long idx, String nickname) {
         int queryResult = 0;
 
-        BoardDTO board = boardMapper.selectBoardDetail(idx);
 
-        if(board != null && "N".equals(board.getDeleteYn())){
+        BoardDTO board = boardMapper.selectBoardDetail(idx);
+        if (!nickname.equals(board.getWriter())) {
+            //2가 리턴되면 해당 게시글에 대한 권한이 없는것이다.
+            return 2;
+        }
+
+        if (board != null && "N".equals(board.getDeleteYn())) {
             queryResult = boardMapper.deleteBoard(idx);
         }
 
-        return (queryResult == 1) ? true : false;
+        return queryResult == 1 ? 1 : 0;
     }
 
     @Override
@@ -51,8 +69,9 @@ public class BoardServiceImpl implements BoardService {
 
         int boardTotalCount = boardMapper.selectBoardTotalCount();
 
-        if(boardTotalCount > 0)
+        if (boardTotalCount > 0) {
             boardList = boardMapper.selectBoardList();
+        }
 
         return boardList;
     }
